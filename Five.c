@@ -15,7 +15,7 @@ void enter_text(int fd, void* buf, int n) {
     while(bytes != n){
         bytes = bytes + read(fd,buf, n);
         
-        if (bytes == -1) {
+        if (read(fd,buf, n) == -1) {
             if (errno == EINTR || EAGAIN) {
                 continue; 
             }
