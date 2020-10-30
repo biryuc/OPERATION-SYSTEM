@@ -16,8 +16,11 @@ void enter_text(int fd, void* buf, int n) {
         bytes = bytes + read(fd,buf, n);
         
         if (read(fd,buf, n) == -1) {
-            if (errno == EINTR || EAGAIN) {
+            if (errno == EINTR)  {
                 continue; 
+            }
+            else if (errno == EAGAIN) {
+            	continue;
             }
             else {
                 perror("Error while reading!");
