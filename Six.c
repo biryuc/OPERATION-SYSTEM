@@ -8,35 +8,33 @@
 #include <sys/time.h>
 
 
-void enter_text(int fd, void* buf, int n) {
-
+int read_bytes(int fd, void* buf, int n) {
+    int a = 0;
+    int ret = 0;
     int bytes = 0;
-    
     while(bytes != n){
-        bytes = bytes + read(fd,buf, n);
+        ret = read(fd,buf, n);
         
-        if (read(fd,buf, n) == -1) {
-            if (errno == EINTR)  {
+        if (ret == -1) {
+            if (errno == EINTR || errno == EAGAIN)  {
                 continue; 
-            }
-            else if (errno == EAGAIN) {
-            	continue;
             }
             else {
                 perror("Error while reading!");
-                if(close(fd) == -1) perror("Error close");
-    		exit(0);
+    		a = -2;
             }
         }
-        if(bytes == 0) {
-            perror("Error! You enter wrong value.");
-            if(close(fd) == -1) perror("Error close");
-    	    exit(0);
+        if(ret == 0) {
+            perror("Error! End of file You enter wrong value.");
+    	    a = -3;
         }
+       bytes+= ret;
+       buf+= ret; 
     }
+    return a;
 }
 
-int main()
+int main(int argc , char* argv[])
 {
     off_t offsets[100];
     off_t line_length[100];
@@ -46,7 +44,7 @@ int main()
     fd_set terminal;
 	struct timeval timeout;
 
-    if((fd = open("/home/nikita/OperationSystems/Five.txt",O_RDONLY)) == -1) {
+    if((fd = open(argv[1],O_RDONLY)) == -1) {
         perror("File not open\n");
         return 1;
     }  
@@ -55,7 +53,7 @@ int main()
     lseek(fd,0L,0);
     char myfile[file_size];
 
-    enter_text(fd,myfile, file_size);
+    read_bytes(fd,myfile, file_size);
     for(int i = 0; i < file_size; i++) {
 
         if( myfile[i] == '\n') {
@@ -113,4 +111,5 @@ int main()
         }
     }
 }
+
 
