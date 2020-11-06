@@ -13,7 +13,7 @@ int read_bytes(int fd, void* buf, int n) {
     int ret = 0;
     int bytes = 0;
     while(bytes != n){
-	    n = n - bytes;
+	n = n - bytes;
         ret = read(fd,buf, n);
         
         if (ret == -1) {
