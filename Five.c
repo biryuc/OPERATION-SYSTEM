@@ -23,13 +23,13 @@ int read_bytes(int fd, void* buf, int n) {
             else {
                 perror("Error while reading!");
     		    a = -2;
-		        return -2;
+		    return -2;
             }
         }
         if(ret == 0) {
             perror("Error! End of file You enter wrong value.");
     	        a = -3;
-	            return -3;
+	        return -3;
         }
        bytes+= ret;
        buf+= ret; 
