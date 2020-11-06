@@ -13,6 +13,7 @@ int read_bytes(int fd, void* buf, int n) {
     int ret = 0;
     int bytes = 0;
     while(bytes != n){
+	    n = n - bytes;
         ret = read(fd,buf, n);
         
         if (ret == -1) {
@@ -21,15 +22,18 @@ int read_bytes(int fd, void* buf, int n) {
             }
             else {
                 perror("Error while reading!");
-    		a = -2;
+    		    a = -2;
+		        return -2;
             }
         }
         if(ret == 0) {
             perror("Error! End of file You enter wrong value.");
-    	    a = -3;
+    	        a = -3;
+	            return -3;
         }
        bytes+= ret;
        buf+= ret; 
+	
     }
     return a;
 }
