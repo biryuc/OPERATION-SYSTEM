@@ -13,6 +13,7 @@ int read_bytes(int fd, void* buf, int n) {
     int ret = 0;
     int bytes = 0;
     while(bytes != n){
+	n = n - bytes;
         ret = read(fd,buf, n);
         
         if (ret == -1) {
@@ -22,14 +23,17 @@ int read_bytes(int fd, void* buf, int n) {
             else {
                 perror("Error while reading!");
     		a = -2;
+		return -2;
             }
         }
         if(ret == 0) {
             perror("Error! End of file You enter wrong value.");
     	    a = -3;
+	    return -3;
         }
        bytes+= ret;
        buf+= ret; 
+	
     }
     return a;
 }
@@ -83,9 +87,14 @@ int main(int argc , char* argv[])
         selectResult = select(fd_max+1, &terminal, NULL, NULL, &timeout);
 	
         if (selectResult  == -1) { 
+            if (errno == EINTR || errno == EAGAIN)  {
+                continue; 
+            }
+	    else {
             perror("select()");
             if(close(fd) == -1) perror("Error while closing");
-    		exit(0);
+    		return -1;
+	    }
         }
 
         if (selectResult != 0) { 
