@@ -32,11 +32,7 @@ int main(int argc, char* argv[])
     lseek(fd,0L,0);
 
     buf = mmap(0,file_size,PROT_READ,MAP_SHARED,fd,0);
-        if (buf == -1){
-            perror("Error");
-            return -2;
-        }
-
+        
     for(int i = 0; i < file_size; i++) {
 
         if( buf[i] == '\n') {
@@ -83,7 +79,7 @@ int main(int argc, char* argv[])
 
             if(need_line > line_number || need_line < 0) {
                 perror("Error! We haven't this line!");
-                on_error(fd,buf,file_size);
+                continue;
             }
 
             for(int i = offsets[need_line -1]; i < offsets[need_line -1] + line_length[need_line - 1]; i++)
