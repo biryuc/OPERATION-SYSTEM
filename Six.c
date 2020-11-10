@@ -87,7 +87,7 @@ int main(int argc , char* argv[])
         selectResult = select(fd_max+1, &terminal, NULL, NULL, &timeout);
 
         if (selectResult  == -1) {
-            if (errno == EINTR || errno == EAGAIN)  {
+            if (errno == EINTR || errno == EINVAL)  {
                 continue;
             }
             else {
@@ -107,7 +107,7 @@ int main(int argc , char* argv[])
             if(need_line > line_number || need_line < 0) {
                 perror("Error! We haven't this line!");
                 if(close(fd) == -1) perror("Error while closing");
-                exit(0);
+                return 0;
             }
 
             for(int i = offsets[need_line -1]; i < offsets[need_line -1] + line_length[need_line - 1]; i++)
