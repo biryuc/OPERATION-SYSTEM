@@ -87,7 +87,7 @@ int main(int argc , char* argv[])
         selectResult = select(fd_max+1, &terminal, NULL, NULL, &timeout);
 
         if (selectResult  == -1) {
-            if (errno == EINTR || errno == EINVAL)  {
+            if (errno == EINTR || errno == EAGAIN)  {
                 continue;
             }
             else {
@@ -98,21 +98,24 @@ int main(int argc , char* argv[])
         }
 
         if (selectResult != 0) {
-            scanf("%d", &need_line);
-            if(need_line == 0) {
-                if(close(fd) == -1) perror("Error while closing");
-                return 0;
-            }
+            if (FD_ISSET(fd, &terminal) != 0) {
+                scanf("%d", &need_line);
+                if (need_line == 0) {
+                    if (close(fd) == -1) perror("Error while closing");
+                    return 0;
+                }
 
-            if(need_line > line_number || need_line < 0) {
-                perror("Error! We haven't this line!");
-                if(close(fd) == -1) perror("Error while closing");
-                return 0;
-            }
+                if (need_line > line_number || need_line < 0) {
+                    perror("Error! We haven't this line!");
+                    if (close(fd) == -1) perror("Error while closing");
+                    exit(0);
+                }
 
-            for(int i = offsets[need_line -1]; i < offsets[need_line -1] + line_length[need_line - 1]; i++)
-                printf("%c", myfile[i]);
+                for (int i = offsets[need_line - 1]; i < offsets[need_line - 1] + line_length[need_line - 1]; i++)
+                    printf("%c", myfile[i]);
+            }
         }
+    }
         if( selectResult == 0){
             for(int i = 0; i < file_size; i++)
                 printf("%c", myfile[i]);
@@ -121,5 +124,3 @@ int main(int argc , char* argv[])
         }
     }
 }
-
-
