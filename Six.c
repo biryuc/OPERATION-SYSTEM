@@ -33,32 +33,34 @@ int read_bytes(int fd, void* buf, int n) {
         }
         bytes+= ret;
         buf+= ret;
-
+	
     }
     return a;
 }
 
-int main(int argc , char* argv[])
+int main(int argc, char* argv[])
 {
     off_t offsets[100];
     off_t line_length[100];
-    int line_number = 0;
-    int need_line = 1;
     int fd, selectResult;
-    int fd_max = 0;
+    int line_number = 0;
+    int need_line = 1; 
+
+
     fd_set terminal;
-    struct timeval timeout;
+	struct timeval timeout;
 
     if((fd = open(argv[1],O_RDONLY)) == -1) {
         perror("File not open\n");
         return 1;
-    }
-
+    }  
+   
     int file_size = lseek(fd, 0L, 2);
     lseek(fd,0L,0);
     char myfile[file_size];
 
     read_bytes(fd,myfile, file_size);
+
     for(int i = 0; i < file_size; i++) {
 
         if( myfile[i] == '\n') {
@@ -74,51 +76,50 @@ int main(int argc , char* argv[])
             line_number++;
         }
     }
+    printf("What line you need?\n");
+    printf("Count of lines : %d\n ", line_number);
+    
+    while(!0) {
 
-    printf("count of lines : %d\n ", line_number);
-
-    while(!0){
-
+        
         FD_SET(0, &terminal);
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
-        printf("You have only five second to enter line\n");
-        printf("What line you need?\n");
-        selectResult = select(fd_max+1, &terminal, NULL, NULL, &timeout);
 
-        if (selectResult  == -1) {
-            if (errno == EINTR || errno == EAGAIN)  {
-                continue;
+        selectResult = select(4, &terminal, NULL, NULL, &timeout);
+
+        if (selectResult  == -1) { 
+            perror("select()");
+            if(close(fd) == -1) perror("Error while closing");
+            return -1;
+        }
+
+        if (selectResult != 0) { 
+           if (FD_ISSET(fd, &terminal) != 0) {
+            scanf("%d", &need_line);
+            if(need_line == 0) {
+                if(close(fd) == -1) perror("Error while closing");
+                return 0;
             }
-            else {
-                perror("select()");
+
+            if(need_line > line_number || need_line < 0) {
+                perror("Error! We haven't this line!");
                 if(close(fd) == -1) perror("Error while closing");
                 return -1;
             }
+
+            for(int i = offsets[need_line -1]; i < offsets[need_line -1] + line_length[need_line - 1]; i++)
+                printf("%c", myfile[i]);
+             }  else {
+            	   printf("fd absent in fd_set");
+            	   return -1;
+        	 }
+
         }
 
-        if (selectResult != 0) {
-            if (FD_ISSET(fd, &terminal) != 0) {
-                scanf("%d", &need_line);
-                if (need_line == 0) {
-                    if (close(fd) == -1) perror("Error while closing");
-                    return 0;
-                }
-
-                if (need_line > line_number || need_line < 0) {
-                    perror("Error! We haven't this line!");
-                    if (close(fd) == -1) perror("Error while closing");
-                    exit(0);
-                }
-
-                for (int i = offsets[need_line - 1]; i < offsets[need_line - 1] + line_length[need_line - 1]; i++)
-                    printf("%c", myfile[i]);
-            }
-        }
-    }
         if( selectResult == 0){
             for(int i = 0; i < file_size; i++)
-                printf("%c", myfile[i]);
+            printf("%c", myfile[i]);
             if(close(fd) == -1) perror("Error while closing");
             return 0;
         }
