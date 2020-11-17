@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
         }
 
         if (selectResult != 0) {
+           if (FD_ISSET(fd, &terminal) != 0) {
             scanf("%d", &need_line);
 
             if(need_line == 0) {
@@ -84,6 +85,10 @@ int main(int argc, char* argv[])
 
             for(int i = offsets[need_line -1]; i < offsets[need_line -1] + line_length[need_line - 1]; i++)
                 printf("%c", buf[i]);
+            }  else {
+            	   printf("fd absent in fd_set");
+            	   return -1;
+        	 }
         }
 
         if( selectResult == 0){
