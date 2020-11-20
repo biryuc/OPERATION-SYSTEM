@@ -102,10 +102,10 @@ int main(int argc, char* argv[])
      if (munmap(buf, file_size)==-1) {
         close(fd);
         if (close(fd) == -1) {
-            fprintf("Error at close");
+            printf("Error at close");
             return -1;
         }
-        fprintf("Error un-mmapping the file");
+        printf("Error un-mmapping the file");
         return -1;
      } 
 }
