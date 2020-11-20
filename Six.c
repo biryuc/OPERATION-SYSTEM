@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     int fd, selectResult;
     int line_number = 0;
     int need_line = 1; 
-
+    int max_fd = 0;
 
     fd_set terminal;
 	struct timeval timeout;
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
         timeout.tv_sec = 5;
         timeout.tv_usec = 0;
 
-        selectResult = select(4, &terminal, NULL, NULL, &timeout);
+        selectResult = select(max_fd+1, &terminal, NULL, NULL, &timeout);
 
         if (selectResult  == -1) { 
             perror("select()");
