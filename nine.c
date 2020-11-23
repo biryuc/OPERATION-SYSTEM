@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
     int status;
     char* arg0;
     if ((pid = fork()) > 0) {
-        printf("Hello, how are you?\n");
+        printf("Hello\n");
         if( wait(&status) == -1)
         {
             if(errno == EINTR) wait(&status);
