@@ -2,11 +2,10 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <wait.h>
-//#include <sys/wait.h>
+#include <wait.h>
+#include <sys/wait.h>
 #include <errno.h>
 
-// положительное значение pid - родительский процесс, 0 - порожденный процесс. -1 - ошибка. Оба процесса имеют одинаковую возможность получить управление. Поэтому любой из них может начать исполнение первым
 
 int main(int argc, char *argv[]){
 
