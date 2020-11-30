@@ -17,8 +17,8 @@ int main()
         return -1;
     }
 
-    char buf[MSGSIZE];
-    int read_on_bytes = fread(buf, 1, MSGSIZE, pipe);
+    char msgin[MSGSIZE];
+    int read_on_bytes = fread(msgin, 1, MSGSIZE, pipe);
     if (read_on_bytes == -1)
     {
         perror("while read");
@@ -28,10 +28,10 @@ int main()
 
     for (int i = 0; i < read_on_bytes; i++)
     {
-        buf[i] = toupper(buf[i]);
+        msgin[i] = toupper(msgin[i]);
     }
 
-    if (fwrite(buf, read_on_bytes, 1, stdout) == -1)
+    if (fwrite(msgin, read_on_bytes, 1, stdout) == -1)
     {
         perror("while write");
         return -3;
