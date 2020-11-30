@@ -4,17 +4,17 @@
 #include <sys/wait.h>
 
 int main(int argc, char* argv[]){
-    FILE* f;
+    FILE* pipe;
     int status;
     char result[3];
  
-    f = popen("grep \"^$\" /home/nikita/mytext.txt | wc -l ", "r");
-    if(f == NULL){
+    pipe = popen("grep \"^$\" /home/nikita/my.txt | wc -l ", "r");
+    if(pipe == NULL){
         perror("popen fail!");
         exit(1);
     }
-    fgets(result,3,f);
-    if((status = pclose(f)) != 0){
+    fgets(result,3,pipe);
+    if((status = pclose(pipe)) != 0){
         if(status == -1) perror("pclose faild or wait faild!");
         else {
         if(WIFEXITED(status) != 0) printf("exit status: %d\n", WEXITSTATUS(status));
