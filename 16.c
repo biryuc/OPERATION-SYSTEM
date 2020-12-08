@@ -38,10 +38,12 @@ int   main()
       tcgetattr(0, &tty);
       savtty = tty;
       tty.c_lflag &= ~(ISIG | ICANON);
-      tty.c_cc[VMIN] = 1;
+      //ISIG    Когда любой из символов INTR, QUIT, SUSP или DSUSP повторнопринято, генерировать соответствующий сигнал.
+      //ICANON Включить канонический режим.
+      tty.c_cc[VMIN] = 1; //минимальное кол-во символово для чтения неканонического чтения
       tcsetattr(0, TCSAFLUSH, &tty);
       read(0, &c, 1);
-      tcsetattr(0, TCSANOW, &savtty);
+      tcsetattr(0, TCSANOW, &savtty); //TCSANOW изменение происходит немедленно.
       putchar('\n');
       return(c);
   }
