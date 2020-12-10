@@ -30,12 +30,12 @@ int main() {
       tty.c_lflag &= ~ECHO;
       tcsetattr(0, TCSANOW, &savtty);
       while(1) {
-      if(signal(SIGINT, handler)==SIG_ERR) {
-        perror("SIGINT");
-      }
-      if(signal(SIGQUIT, handler)==SIG_ERR) { 
-        perror("SIGQUIT");
-      }
+        if(signal(SIGINT, handler)==SIG_ERR) {
+            perror("SIGINT");
+        }
+        if(signal(SIGQUIT, handler)==SIG_ERR) { 
+            perror("SIGQUIT");
+        }
       }
 
     return 0;
