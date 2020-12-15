@@ -13,7 +13,7 @@ struct termios tty,savtty;
 
 void handler(int sig) {
     if (sig == SIGQUIT) {
-        printf("Count %d\n",counter);
+        
         tcsetattr(0, TCSANOW, &savtty);
         exit(0);
     }
