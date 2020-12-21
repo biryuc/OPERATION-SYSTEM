@@ -9,26 +9,33 @@ int execvpe(char *file, char *argv[], char *envp[])
     for(int i=0; environ[i] != NULL; i++)
     {
         printf("%s\n", environ[i]);
+        environ[i] = NULL;
     }
 
-    environ = envp;
-    printf("New environ is:\n");
-    for(int i=0; environ[i] != NULL; i++)
+
+
+    for (int i=0; envp[i] != NULL; i++)
     {
-        printf("%s\n", environ[i]);
+        if (putenv(envp[i]) == -1)
+        {
+            return -1;
+        }
+        printf("%s\n", envp[i]);
+        
     }
-    execvp(file, argv);
-    return(1);
+    return execvp(file, argv);
 }   
 
 int main()
 {
-    static char *argv[ ] =
-    { "/home/nikita/", "text", (char *) 0 };
-    static char *nenv[ ] =
-    { "ChangeEnv=yes", "MYFILE=text", (char *) 0 };
+    char *file = "/bin/sh";
+    char *argv[] = {file, "-c", "env", (char *) 0};
+    static char *envp[] = {"PATH=/usr/bin","KEY=VALUE",(char *) 0};
+    if (execvpe(file, argv, envp) == -1)
+    {
+        perror("execvpe() Error: ");
+        return -1;
+    }
 
-    execvpe(argv[0], argv, nenv);
-    perror(argv[0]);
-    exit(1);
+    return 0;
 } 
