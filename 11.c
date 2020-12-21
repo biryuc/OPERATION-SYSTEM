@@ -8,7 +8,7 @@ int execvpe(char *file, char *argv[], char *envp[])
     printf("Old environ is:\n");
     for(int i=0; environ[i] != NULL; i++)
     {
-        printf("%s\n", environ[i]);
+       
         environ[i] = NULL;
     }
 
