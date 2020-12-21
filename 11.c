@@ -20,7 +20,6 @@ int execvpe(char *file, char *argv[], char *envp[])
         {
             return -1;
         }
-        printf("%s\n", envp[i]);
         
     }
     return execvp(file, argv);
