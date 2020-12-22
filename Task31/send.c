@@ -1,81 +1,82 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <string.h>
+#include <sys/types.h> 
+#include <sys/socket.h> 
+#include <string.h> 
 #include <sys/un.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #define SOCKETNAME  "SOCKET"
 
-int
-main(void)
+int main()
 {
-    int s;		/* This end of connection*/
-    int len;	/* length of sockaddr */
-    int nread;	/* return from read() */
-    int nready;	/* # fd's ready. */
-    int maxfd;	/* fd's 0 to maxfd-1 checked. */
-    char buf[1024];
-    fd_set fds;	/* set of file descriptors to check. */
-    struct sockaddr_un name;
+	int sock;       // socket
+	int len;	// Длина sockaddr 
+	int sockread;	// return from read() 
+	int nready;	// # descriptors ready. 
+	int maxfd;	  
+	char buf[1024];
+	fd_set fds;	 
+	struct sockaddr_un server;
 
 
-    if( (s = socket(AF_UNIX, SOCK_STREAM, 0) ) < 0){
-        perror("socket");
-        exit(1);
-    }
+	if( (sock = socket(AF_UNIX, SOCK_STREAM, 0) ) < 0){
+		perror("socket");
+		exit(1);
+	}
 
-    /*Create the address of the server.*/
+	/*Create the address of the server.*/
 
-    memset(&name, 0, sizeof(struct sockaddr_un));
+	memset(&server, 0, sizeof(struct sockaddr_un));
 
-    name.sun_family = AF_UNIX;
-    strcpy(name.sun_path, SOCKETNAME);
-    len = sizeof(name.sun_family) + strlen(name.sun_path);
-
-
-    /*Connect to the server.*/
-
-    if (connect(s, (struct sockaddr *) &name, len) < 0){
-        perror("connect");
-        exit(1);
-    }
+	server.sun_family = AF_UNIX;
+	strcpy(server.sun_path, SOCKETNAME);
+	len = sizeof(server.sun_family) + strlen(server.sun_path);
 
 
-    maxfd = s + 1;
-    while(1){
-        /* Set up polling. */
-        FD_ZERO(&fds);
-        FD_SET(s,&fds);
-        FD_SET(0,&fds);
+	/*Connect to the server.*/
 
-        /* Wait for some input. */
-        nready = select(maxfd, &fds, (fd_set *) 0, (fd_set *) 0,
-                        (struct timeval *) 0);
+	if (connect(sock, (struct sockaddr *) &server, len) < 0){
+		perror("connect");
+		exit(1);
+	}
 
-        /* If either device has some input,
-           read it and copy it to the other. */
 
-        if( FD_ISSET(s, &fds))
-        {
-            nread = recv(s, buf, sizeof(buf), 0);
-            /* If error or eof, terminate. */
-            if(nread < 1){
-                close(s);
-                exit(0);
-            }
-            write(1, buf, nread);
-        }
+	maxfd = sock + 1;
+	while(1){
+		
+		FD_ZERO(&fds);
+		FD_SET(sock,&fds);
+		FD_SET(0,&fds);
 
-        if( FD_ISSET(0, &fds))
-        {
-            nread = read(0, buf, sizeof(buf));
-            /* If error or eof, terminate. */
-            if(nread < 1){
-                close(s);
-                exit(0);
-            }
-            send( s, buf, nread, 0);
-        }
-    }
+		
+		nready = select(maxfd, &fds, (fd_set *) 0, (fd_set *) 0,
+				(struct timeval *) 0);
+
+		
+		// MSG from server
+		if( FD_ISSET(sock, &fds))
+		{
+			sockread = recv(sock, buf, sizeof(buf), 0);
+			
+			if(sockread < 1){
+			       close(sock);
+			       return -1;
+			}
+			write(1, buf, sockread);
+		}
+		//send to server
+		if( FD_ISSET(0, &fds))
+		{
+			sockread = read(0, buf, sizeof(buf));
+			
+			if(sockread < 1){
+				close(sock);
+				return -1;
+			}
+			send( sock, buf, sockread, 0); 
+		}
+	} 
 
 }
