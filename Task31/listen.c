@@ -1,107 +1,109 @@
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include <sys/types.h> 
+#include <sys/socket.h> 
 #include <sys/un.h>
 #include <string.h>
 #include <stdlib.h>
 #include <sys/time.h>
-
+#include <stdio.h>
+#include <unistd.h>
 #define SOCKETNAME  "SOCKET"
 
-int
-main(void)
+int main()
 {
-    char buf[1024];			/* Buffer for messages to others. */
-    int s;				/* Listen socket */
-    int ns;				/* Socket for first connection. */
-    int ns2;			/* Socket for second connection. */
-    int len;			/* len of sockaddr */
-    int maxfd;			/* descriptors up to maxfd-1 polled*/
-    int nread;			/* # chars on read()*/
-    int nready;			/* # descriptors ready. */
-    struct sockaddr_un name;
-    fd_set fds;			/* Set of file descriptors to poll*/
+	char buf[1024];			
+	int sock;				/* Listen socket */
+	int ns;				/* Socket for first connection. */
+	int ns2;			/* Socket for second connection. */
+	int len;			/* len of sockaddr */	
+	int maxfd;			
+	int sockread;			/* # chars on read()*/
+	int nready;			/* # descriptors ready. */
+	struct sockaddr_un server;
+	fd_set fds;			
 
-    /* Remove any previous socket.*/
-    unlink(SOCKETNAME);
+	/* Remove any previous socket.*/
+	unlink(SOCKETNAME);
 
-    /* Create the socket. */
+	/* Create the socket. */
 
-    if ((s = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
-    {
-        perror("socket");
-        exit(1);
-    }
+	if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0){
+		perror("socket");
+		return -1;
+         }
 
-    /* Create the address of the server.*/
+	/* Create the address of the server.*/
 
-    memset(&name, 0, sizeof(struct sockaddr_un));
+	memset(&server, 0, sizeof(struct sockaddr_un));
 
-    name.sun_family = AF_UNIX;
-    strcpy(name.sun_path, SOCKETNAME);
-    len = sizeof(name.sun_family) + strlen(name.sun_path);
+	server.sun_family = AF_UNIX;
+	strcpy(server.sun_path, SOCKETNAME);
+	len = sizeof(server.sun_family) + strlen(server.sun_path);
 
-    /*Bind the socket to the address.*/
+	/*Bind the socket to the address.*/
 
-    if (bind(s, (struct sockaddr *) &name, len) < 0) {
-        perror("bind");
-        exit(1);
-    }
+	if (bind(sock, (struct sockaddr *) &server, len) < 0) {
+		perror("bind");
+		return -2;
+	}
+ 	
+	/* Listen for connections. */
+	if (listen(sock, 5) < 0){
+		perror( "listen");
+		return -3;
+	}
 
-    /* Listen for connections. */
-    if (listen(s, 5) < 0){
-        perror( "listen");
-        exit(1);
-    }
 
+        /*Accept a connection.*/
+	if ((ns = accept(sock, (struct sockaddr *) &server, &len)) < 0) {
+		perror("accept");
+		return -4;
+	}
 
-    /*Accept a connection.*/
-    if ((ns = accept(s, (struct sockaddr *) &name, &len)) < 0) {
-        perror("accept");
-        exit(1);
-    }
+	/* Accept another connection. */
+	if ((ns2 = accept(sock, (struct sockaddr *) &server, &len)) < 0) {
+		perror("accept");
+		return -5;
+	}
+	
+	if (ns > ns2){
+	maxfd = ns + 1;
+	}
+	else {
+	maxfd = ns2 + 1;
+	}
+	while(1){
+		
+		FD_ZERO(&fds);
+		FD_SET(ns,&fds);
+		FD_SET(ns2,&fds);
 
-    /* Accept another connection. */
-    if ((ns2 = accept(s, (struct sockaddr *) &name, &len)) < 0) {
-        perror("accept");
-        exit(1);
-    }
-
-    maxfd = (ns > ns2 ? ns : ns2) + 1;
-    while(1){
-        /* Set up polling using select. */
-        FD_ZERO(&fds);
-        FD_SET(ns,&fds);
-        FD_SET(ns2,&fds);
-
-        /* Wait for some input. */
-        nready = select(maxfd, &fds, (fd_set *) 0, (fd_set *) 0,
-                        (struct timeval *) 0);
-        /* If either descriptor has some input,
-           read it and copy it to the other. */
-
-        if( FD_ISSET(ns, &fds))
-        {
-            nread = recv(ns, buf, sizeof(buf), 0);
-            /* If error or eof, terminate. */
-            if(nread < 1){
-                close(ns);
-                close(ns2);
-                exit(0);
-            }
-            send( ns2, buf, nread, 0);
-        }
-
-        if( FD_ISSET(ns2, &fds))
-        {
-            nread = recv(ns2, buf, sizeof(buf), 0);
-            /* If error or eof, terminate. */
-            if(nread < 1){
-                close(ns);
-                close(ns2);
-                exit(0);
-            }
-            send( ns, buf, nread, 0);
-        }
-    }
+		
+		nready = select(maxfd, &fds, (fd_set *) 0, (fd_set *) 0,
+				(struct timeval *) 0);
+		//send second client
+		if( FD_ISSET(ns, &fds))
+		{
+			sockread = recv(ns, buf, sizeof(buf), 0);
+			
+			if(sockread < 1){
+				close(ns);
+				close(ns2);
+				return -6;
+			}
+			send( ns2, buf, sockread, 0);
+		}
+		//send first client
+		if( FD_ISSET(ns2, &fds))
+		{
+			sockread = recv(ns2, buf, sizeof(buf), 0);
+			
+			if(sockread < 1){
+				close(ns);
+				close(ns2);
+				return -7;
+			}
+			send( ns, buf, sockread, 0);
+		}
+	} 
 }
