@@ -1,12 +1,12 @@
 #include <sys/types.h>
-   #include <stdlib.h>
-   #include <stdio.h>
-   #include <unistd.h>
-   #include <fcntl.h>
-   #include <errno.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
   
-int   main(int argc, char *argv[])
-   {
+int   main(int argc, char *argv[]) {
+   
       struct flock lock;
       int fd;
       char command[100];
