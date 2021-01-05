@@ -49,7 +49,7 @@ void handle(int client)
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
-    if (getaddrinfo("ar-net.mykeenetic.net", PORT, &hints, &res) != 0) { //сомневаюсь, что такие аргументы
+    if (getaddrinfo("ar-net.mykeenetic.net", PORT, &hints, &res) != 0) { 
         perror("getaddrinfo");
         close(client);
         return;
